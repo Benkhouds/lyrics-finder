@@ -10,7 +10,7 @@ export default function Index() {
     console.log(state)
     function findTrack(term){
         console.log(term)
-        axios.get(`https://api.musixmatch.com/ws/1.1/track.search?q_track_artist=${term}&page_size=10&page=1&s_track_rating=desc
+        axios.get(`https://api.musixmatch.com/ws/1.1/track.search?q_track=${term}&f_has_lyrics=1&s_artist_rating=desc&page_size=10&page=1
         &apikey=${process.env.REACT_APP_MM_API_KEY}`)
         .then((res)=>{
            console.log(res.data.message)

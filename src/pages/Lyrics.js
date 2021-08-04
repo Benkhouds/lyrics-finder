@@ -10,7 +10,9 @@ export default class Lyrics extends Component {
         super(props);
         this.state={
             trackInfo:{},
-            lyrics:{}
+            lyrics:{},
+            lyricsError:'',
+            infoError:''
         };
          
     }
@@ -23,6 +25,7 @@ export default class Lyrics extends Component {
         .then((res)=>{
            console.log(res)
            if(res.data.message.header.status_code !== 200){
+               this.setState({lyricsError:res.data.message.header.status_code})
                throw Error(res.statusText)
            }
            this.setState({lyrics:res.data.message.body.lyrics})
@@ -31,6 +34,7 @@ export default class Lyrics extends Component {
         .then((res)=>{
             console.log(res.data)
             if(res.data.message.header.status_code !== 200){
+                this.setState({infoError:res.data.message.header.status_code})
                 throw Error(res.statusText)
             }
             this.setState({trackInfo : res.data.message.body.track})
@@ -38,16 +42,17 @@ export default class Lyrics extends Component {
         .catch(err=>console.log(err))
     }
     render() {
-        const {trackInfo , lyrics} = this.state
+        const {trackInfo , lyrics, lyricsError, infoError} = this.state
         const explicit = trackInfo.explicit ?'Yes': 'No'
         const genre= (trackInfo.primary_genres && trackInfo.primary_genres.music_genre_list[0]) ?
         trackInfo.primary_genres.music_genre_list[0].music_genre.music_genre_name : 'Pop'
-
         return(
             <>
            
             <Link className="btn btn-dark mb-4" to="/">Go Back</Link>
-            {lyrics && Object.keys(lyrics).length ?
+            {lyricsError && <div>{lyricsError}</div>}
+            {infoError && <div>{infoError}</div>}
+            {!lyricsError &&( lyrics && Object.keys(lyrics).length ?
                 <div className="card">
                 <h3 className="card-header px-4">Lyrics</h3>
                 <div className="card-body px-4">
@@ -55,9 +60,9 @@ export default class Lyrics extends Component {
                 </div>
                 </div> 
              :
-                <Spinner/>
+                <Spinner/>)
              }
-             {lyrics && Object.keys(trackInfo).length  ?
+             {!infoError && (trackInfo && Object.keys(trackInfo).length  ?
                <div>
                    <ul className="list-group">
                        <li className="list-group-item">
@@ -79,8 +84,7 @@ export default class Lyrics extends Component {
 
                    </ul>
                </div>
-               :
-               <Spinner/>
+               : <Spinner/>)
             }
             </>
         )
