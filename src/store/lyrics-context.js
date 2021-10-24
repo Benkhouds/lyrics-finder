@@ -1,27 +1,49 @@
-import { createContext , useState, useEffect} from 'react'
-import axios from 'axios'
+import { createContext , useEffect, useReducer} from 'react'
+import axios from '../config/axiosConfig'
 
 const LyricsContext = createContext()
-const baseURL= 'https://api.musixmatch.com/ws/1.1/';
 
+
+const url  =`/chart.tracks.get?chart_name=top&page=1&page_size=20&country=us&f_has_lyrics=1&apikey=${process.env.REACT_APP_MM_API_KEY}`;
+
+function reducer(state, action){
+
+    switch(action.type){
+        case 'reset':{
+            return {...state ,isLoading: true, error:''}
+        }
+        case 'error':{
+            return {...state,isLoading:false,  error: action.setError}
+        }
+        case 'tracks':{
+            return {...state, isLoading: false, tracks: action.setTracks, title:action.setTitle }
+        }
+        default:{
+            return {...state, error:'Action not defined'}
+        }
+    }
+}
 export function LyricsContextProvider({children}){
-    const [state, setState]= useState({title:'', trackList:[]})
+    const [state, dispatch]= useReducer(reducer, {title:'', tracks:[] , error:'', isLoading:true})
   
 
    useEffect(()=>{
-      axios.get(`${baseURL}/chart.tracks.get?chart_name=top&page=1&page_size=20&country=us&f_has_lyrics=1&apikey=${process.env.REACT_APP_MM_API_KEY}`)
+      axios(url)
         .then((res)=>{
-           console.log(res.data.message)
-           setState({title:'Top 10 Songs', trackList: res.data.message.body.track_list})
+            console.log(res.data);
+           dispatch({type:'tracks', setTitle:'Top 10 Songs', setTracks: res.data.message.body.track_list})
 
+        }) 
+        .catch(err=>{
+            console.log(err)
+            dispatch({type:'error', setError:'Error Loading Data' });
         })
-        .catch(err=>console.log(err))
    },[])
 
 
    const context = {
        state,
-       setState
+       dispatch
    }
     
     return (

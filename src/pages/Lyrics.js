@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
-import axios from 'axios'
+import axios from '../config/axiosConfig'
 import {Link} from 'react-router-dom'
 import Spinner from '../components/layout/Spinner'
 
-const baseURL= 'https://api.musixmatch.com/ws/1.1/';
 
 export default class Lyrics extends Component {
     constructor(props){
@@ -20,8 +19,7 @@ export default class Lyrics extends Component {
     componentDidMount(){
         const id =this.props.match.params.id;
          console.log(id)
-        axios.get(`${baseURL}/track.lyrics.get?track_id=${id}
-        &apikey=${process.env.REACT_APP_MM_API_KEY}`)
+        axios.get(`/track.lyrics.get?track_id=${id}&apikey=${process.env.REACT_APP_MM_API_KEY}`)
         .then((res)=>{
            console.log(res)
            if(res.data.message.header.status_code !== 200){
@@ -29,7 +27,7 @@ export default class Lyrics extends Component {
                throw Error(res.statusText)
            }
            this.setState({lyrics:res.data.message.body.lyrics})
-           return axios.get(`${baseURL}/track.get?track_id=${id}&apikey=${process.env.REACT_APP_MM_API_KEY}`)          
+           return axios.get(`/track.get?track_id=${id}&apikey=${process.env.REACT_APP_MM_API_KEY}`)          
         })
         .then((res)=>{
             console.log(res.data)
